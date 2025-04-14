@@ -3,6 +3,7 @@ from Entities.Appointment import Appointment
 
 # Importando a estrutura do tipo lista 
 from typing import List
+from datetime import datetime
 
 # Classe Cliente
 class Client:
@@ -30,3 +31,9 @@ class Client:
         for list in self.appointment:
             total_value += list.service.price
         return total_value
+    
+    def get_appoinments(self, new_appointment: datetime,) -> bool:
+        for appointment in self.appointment:
+            if new_appointment == appointment.service_appointment:
+                return True
+        return False

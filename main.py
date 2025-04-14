@@ -3,7 +3,7 @@ from Entities.Client import Client
 from Entities.Service_Provider import Service_Provider
 from Entities.Service import Service
 from Entities.Appointment import Appointment
-#from datetime import datetime
+from datetime import datetime
 
 # Projeto principal (main)
 def main():
@@ -36,27 +36,36 @@ def main():
                 # Intanciando o objeto Cliente
                 new_client = Client(client_id, client_name, client_email, client_cellphone)
 
-                # Verificando se o ID do cliente ja existe para nao sobrepor um cliente ja existente
-                if client_id in clients_list:
-                    print("*[ERROR]* This client ID already exists and was not added. Please enter a different ID.")
+                if len(clients_list) != 0:
+
+                    # Verificando se a lista esta vazia 
+                    for id, my_client in clients_list.items():
+
+                        # Verificando se o ID do cliente ja existe para nao sobrepor um cliente ja existente
+                        if my_client.client_id != client_id:
+                            clients_list[client_id] = new_client
+                            print("\n*\u2705 NEW CLIENT ADDED!*\n")
+                            break
+                        else:
+                            print("\n*\u274C [ERROR]* This client ID already exists and was not added. Please enter a different ID.\n")
+                            break
                 else:
-                    # Adicionando o cliente ao dicionario
                     clients_list[client_id] = new_client
-                    print(f"\n*NEW CLIENT ADDED!*\nClient ID: {new_client.client_id}, Name: {new_client.client_name},\nEmail: {new_client.client_email},\nCellphone: {new_client.client_cellphone}\n")
-
-
-        # ainda não inclui o metodo de verificar se agendamento sobrepoem o outro1
+                    print("\n*\u2705 NEW CLIENT ADDED!*\n")
+                        
+        # Função de fazer agendamentos caso seja escolhido a opção 1
         elif option == 2:
-            print("\nCLIENTS LIST:")
+            print("\nCLIENTS LIST:\n")
 
-            for client_id, client in clients_list.items(): # vou ter que arrumar essa parte pq vou passar o dado do id para a classe cliente.
+            # Listagem do Cliente + ID
+            for client_id, client in clients_list.items():
                 print(f"Client ID: {client.client_id} - Client name: {client.client_name}")
             
             search_id = int(input("\nEnter the client ID that is requesting a service: "))
 
             if search_id in clients_list:
                 client = clients_list[search_id]
-                quantity = int(input("\nHow many services will be added: "))
+                quantity = int(input("How many services will be added: "))
                 print()
 
                 for i in range(1, quantity + 1):
@@ -71,24 +80,29 @@ def main():
 
                     # Instanciando o Serviço
                     new_service = Service(service_name, price, new_service_provider)
+                    appointment_date = str(input("Enter with date of appointment service (DD/MM/YYYY HH:MM): "))
+                    appointment_date = datetime.strptime(appointment_date, "%d/%m/%Y %H:%M")
 
-                    # Instanciando o Agendamento
-                    new_appointment = Appointment(new_service)
-                    appointment_date_unformatted = str(input("Enter with date of appointment service (DD/MM/YYYY HH:MM): "))
-
-                    # Convertendo a string para datetime e atribuindo ao atributo da data
-                    appointment_date_formatted = new_appointment.convert_str_to_datetime(appointment_date_unformatted)
-                    # estou com um problema preciso ver como verificar se ja tem datas naquele dia
-                    if client.appointment[i].is_disponible(appointment_date_formatted, clients_list):
-                        new_appointment.service_appointment = appointment_date_formatted
-
+                    if len(clients_list) != 0:
+                        # Verificando se a lista esta vazia 
+                        for id, my_client in clients_list.items():
+                            if my_client.get_appoinments(appointment_date) == False:
+                                new_appointment = Appointment(new_service, appointment_date)
+                                client.appointment.append(new_appointment)
+                                print("\n*\u2705 APPOINTMENT AND SERVICE ADDED!*\n")
+                                break
+                            else:
+                                print("\n*\u274C [ERROR] This ID already ocupped, the client is not added.*\n")
+                                break
+                    else:
+                        # Instanciando o Agendamento
+                        new_appointment = Appointment(new_service, appointment_date)
+                        
                         # Adiciona o Agendamento ao client
                         client.appointment.append(new_appointment)
-                        print("*APPOINTMENT AND SERVICE ADDED!*\n")
-                    else:
-                        print("ERRO JA TEM AGENDAMENTO MARCADO")
+                        print("\n*\u2705 APPOINTMENT AND SERVICE ADDED!*\n")
             else:
-                print("*[ERROR]* Client not found.")
+                print("\n*\u274C [ERROR]* Client not found.")
             
         # Função de listar os agendamentos caso seja escolhido a opção 3
         elif option == 3:
